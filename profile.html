@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>CaribFlow — Profile</title>
+
+  <link rel="icon" type="image/png" href="./assets/images/brand/favicon.png" />
+  <link rel="manifest" href="./manifest.json" />
+
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/profile.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+
+  <!-- Dynamic Island -->
+  <div id="dynamic-island" role="status" aria-live="polite">
+    <span class="island-icon">👤</span>
+    <span class="island-label">Profile</span>
+  </div>
+
+  <!-- Settings Button (TOP-RIGHT — Profile page ONLY) -->
+  <button class="profile-settings-btn" id="settings-open-btn" aria-label="Open Settings">⚙️</button>
+
+  <!-- Toast -->
+  <div id="toast-container" aria-live="assertive"></div>
+
+  <!-- ══════════ MAIN PROFILE PAGE ══════════ -->
+  <main id="profile-main" style="padding-bottom:100px;">
+
+    <!-- Edit mode bar (shown when grid editing) -->
+    <div class="edit-mode-bar" id="edit-mode-bar" style="display:none;">
+      <div class="edit-mode-label">✏️ Edit Mode — Drag widgets to reorder</div>
+      <button class="btn btn-glass btn-sm" id="edit-mode-save">Save Layout</button>
+    </div>
+
+    <!-- HERO SECTION -->
+    <div class="profile-hero" id="profile-hero">
+      <!-- Banner -->
+      <div class="profile-banner" id="profile-banner"></div>
+
+      <!-- Avatar -->
+      <div class="profile-avatar-wrap">
+        <img src="./assets/images/avatars/default_avatar.png" alt="Profile picture" class="profile-avatar" id="profile-avatar-img" />
+        <button class="profile-avatar-edit-btn" id="pfp-edit-btn" aria-label="Change profile picture">📷</button>
+        <input type="file" id="pfp-file-input" accept="image/*" style="display:none;" />
+      </div>
+
+      <!-- Username & title -->
+      <h1 class="profile-username" id="profile-username-display">Loading…</h1>
+      <div class="profile-title-display" id="profile-title-display" style="display:none;">
+        <span id="profile-title-text">—</span>
+      </div>
+
+      <!-- Badges row -->
+      <div class="profile-badge-display" id="profile-badge-row"></div>
+
+      <!-- Stats row -->
+      <div class="profile-stats-row">
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="prof-stat-level">1</div>
+          <div class="profile-stat-label">Level</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="prof-stat-streak">0</div>
+          <div class="profile-stat-label">Streak 🔥</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="prof-stat-xp">0</div>
+          <div class="profile-stat-label">Total XP</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="prof-stat-longest">0</div>
+          <div class="profile-stat-label">Best Streak</div>
+        </div>
+      </div>
+
+      <!-- XP bar -->
+      <div style="width:100%;max-width:320px;z-index:1;position:relative;">
+        <div class="xp-bar-container">
+          <span class="xp-bar-label" id="prof-xp-level-label">LVL 1</span>
+          <div class="progress-track flex-1">
+            <div class="progress-fill" id="prof-xp-fill" style="width:0%"></div>
+          </div>
+          <span class="xp-bar-label" id="prof-xp-pct">0%</span>
+        </div>
+      </div>
+
+      <div class="profile-joined" id="profile-joined">Joined loading…</div>
+
+      <!-- Edit layout button -->
+      <button class="btn btn-glass btn-sm" id="edit-layout-btn" style="z-index:1;position:relative;">
+        ✏️ Customise Layout
+      </button>
+    </div>
+
+    <!-- PROFILE GRID (Draggable Widgets) -->
+    <div class="profile-grid" id="profile-grid">
+
+      <!-- Widget: Streak -->
+      <div class="profile-widget" data-widget="streak" draggable="false">
+        <div class="widget-drag-handle" aria-hidden="true">⠿</div>
+        <div class="widget-header"><span class="widget-title">Streak</span></div>
+        <div class="streak-display">
+          <div class="streak-flame">🔥</div>
+          <div class="streak-count" id="w-streak-count">0</div>
+          <div class="streak-label">Day Streak</div>
+          <div class="streak-freeze-count" id="w-freeze-count">🧊 0 Freezes</div>
+        </div>
+      </div>
+
+      <!-- Widget: Currency -->
+      <div class="profile-widget" data-widget="currency" draggable="false">
+        <div class="widget-drag-handle" aria-hidden="true">⠿</div>
+        <div class="widget-header"><span class="widget-title">Economy</span></div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+          <div class="currency-chip coins" style="justify-content:space-between;">
+            <span>🪙 Coins</span><strong id="w-coins">0</strong>
+          </div>
+          <div class="currency-chip diamonds" style="justify-content:space-between;">
+            <span>💎 Diamonds</span><strong id="w-diamonds">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Widget: Subject Ranks -->
+      <div class="profile-widget" data-widget="subjects" draggable="false">
+        <div class="widget-drag-handle" aria-hidden="true">⠿</div>
+        <div class="widget-header"><span class="widget-title">Subject Ranks</span></div>
+        <div id="w-subjects-list"></div>
+      </div>
+
+      <!-- Widget: Achievements -->
+      <div class="profile-widget" data-widget="achievements" draggable="false">
+        <div class="widget-drag-handle" aria-hidden="true">⠿</div>
+        <div class="widget-header">
+          <span class="widget-title">Achievements</span>
+          <button class="section-action" id="view-all-achievements">View All →</button>
+        </div>
+        <div id="w-achievements-preview"></div>
+      </div>
+
+      <!-- Widget: Cosmetics -->
+      <div class="profile-widget" data-widget="cosmetics" draggable="false">
+        <div class="widget-drag-handle" aria-hidden="true">⠿</div>
+        <div class="widget-header"><span class="widget-title">Cosmetics</span></div>
+        <div class="tab-bar" style="margin-bottom:var(--space-4);">
+          <button class="tab-btn active" data-cos="badges">Badges</button>
+          <button class="tab-btn" data-cos="titles">Titles</button>
+        </div>
+        <div id="cosmetics-grid-container"></div>
+      </div>
+
+      <!-- Widget: Pet -->
+      <div class="profile-widget" data-widget="pet" draggable="false">
+        <div class="widget-drag-handle" aria-hidden="true">⠿</div>
+        <div class="widget-header">
+          <span class="widget-title">Companion</span>
+          <button class="section-action" id="rename-pet-btn">Rename</button>
+        </div>
+        <div class="mascot-widget">
+          <img src="./assets/images/avatars/cari_stage1.png" alt="Cari" class="mascot-image" id="prof-mascot-img" />
+          <div class="mascot-name" id="prof-pet-name">Cari</div>
+          <div class="mascot-stage-label" id="prof-pet-stage">🥚 Stage 1</div>
+          <div class="mascot-xp-bar">
+            <div class="progress-track thin">
+              <div class="progress-fill" id="prof-pet-xp-fill" style="width:0%"></div>
+            </div>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--text-muted);">Pet LVL <span id="prof-pet-level">1</span></div>
+        </div>
+      </div>
+
+    </div><!-- /profile-grid -->
+
+  </main>
+
+  <!-- ══════════ PRIVACY LOCK (shown on other users' profiles) ══════════ -->
+  <div id="privacy-lock-overlay" style="display:none;position:fixed;inset:0;background:var(--bg-primary);z-index:var(--z-overlay);overflow-y:auto;padding-bottom:100px;">
+    <div class="profile-hero">
+      <div class="profile-avatar-wrap" style="margin-top:var(--space-8);">
+        <img src="./assets/images/avatars/default_avatar.png" class="profile-avatar" id="priv-avatar" alt="User avatar" />
+      </div>
+      <h1 class="profile-username" id="priv-username">Unknown</h1>
+      <div class="profile-badge-display" id="priv-badge-row"></div>
+    </div>
+    <div class="privacy-lock-screen">
+      <div class="privacy-lock-icon">🔒</div>
+      <h2 class="privacy-lock-title">Private Profile</h2>
+      <p class="privacy-lock-msg">This profile has been set to private. Only the avatar, username, and equipped badge/title are visible.</p>
+    </div>
+    <div class="privacy-blurred-content" aria-hidden="true">
+      <div style="height:300px;background:var(--glass-bg);border-radius:var(--radius-xl);margin:0 var(--space-4);"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ ALL ACHIEVEMENTS MODAL ══════════ -->
+  <div id="achievements-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="ach-modal-title">
+    <div class="modal-box modal-lg" style="max-height:85vh;overflow-y:auto;position:static;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="ach-modal-title">🏆 All Achievements</h2>
+        <button class="modal-close" id="ach-modal-close">✕</button>
+      </div>
+      <div class="tab-bar" style="margin-bottom:var(--space-6);">
+        <button class="tab-btn active" data-ach-tab="all">All</button>
+        <button class="tab-btn" data-ach-tab="completed">✅ Earned</button>
+        <button class="tab-btn" data-ach-tab="in-progress">⏳ In Progress</button>
+        <button class="tab-btn" data-ach-tab="locked">🔒 Locked</button>
+      </div>
+      <div id="ach-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ SETTINGS FULL-SCREEN MODAL ══════════ -->
+  <div id="settings-modal" class="settings-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div style="max-width:600px;margin:0 auto;">
+
+      <!-- Settings Header -->
+      <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-8);">
+        <button class="modal-close" id="settings-close-btn">✕</button>
+        <h1 id="settings-title" style="font-size:var(--text-2xl);font-weight:var(--fw-heavy);">Settings</h1>
+      </div>
+
+      <!-- THEME -->
+      <div class="settings-section">
+        <div class="settings-section-title">Appearance</div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:var(--space-4);">
+          <span style="font-size:var(--text-base);font-weight:var(--fw-medium);">Theme</span>
+          <div class="theme-options">
+            <div class="theme-option selected" data-theme="dark">
+              <div class="theme-preview"></div>
+              Dark
+            </div>
+            <div class="theme-option" data-theme="light">
+              <div class="theme-preview"></div>
+              Light
+            </div>
+            <div class="theme-option" data-theme="high-contrast">
+              <div class="theme-preview"></div>
+              High Contrast
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCENT -->
+      <div class="settings-section">
+        <div class="settings-section-title">Accent Colour</div>
+        <div class="settings-row">
+          <span style="font-size:var(--text-base);font-weight:var(--fw-medium);">Choose Accent</span>
+          <div class="accent-swatches">
+            <div class="accent-swatch selected" data-accent="ocean"  title="Ocean Blue"></div>
+            <div class="accent-swatch"          data-accent="green"  title="Caribbean Green"></div>
+            <div class="accent-swatch"          data-accent="sunset" title="Sunset Orange"></div>
+            <div class="accent-swatch"          data-accent="coral"  title="Coral Red"></div>
+            <div class="accent-swatch"          data-accent="purple" title="Royal Purple"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DYSLEXIC FONT -->
+      <div class="settings-section">
+        <div class="settings-section-title">Accessibility</div>
+        <div class="settings-row">
+          <div>
+            <div style="font-size:var(--text-base);font-weight:var(--fw-medium);">Dyslexic-Friendly Font</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);">Uses OpenDyslexic typeface</div>
+          </div>
+          <label class="toggle-wrap" for="dyslexic-toggle">
+            <input type="checkbox" class="toggle-input" id="dyslexic-toggle" />
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- PRIVACY -->
+      <div class="settings-section">
+        <div class="settings-section-title">Privacy</div>
+        <div class="settings-row">
+          <div>
+            <div style="font-size:var(--text-base);font-weight:var(--fw-medium);">Private Profile</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);">Other users see only your avatar, username, and badge.</div>
+          </div>
+          <label class="toggle-wrap" for="privacy-toggle">
+            <input type="checkbox" class="toggle-input" id="privacy-toggle" />
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- USER PREFERENCES -->
+      <div class="settings-section">
+        <div class="settings-section-title">Account</div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:var(--space-3);">
+          <div style="font-size:var(--text-base);font-weight:var(--fw-medium);">Display Name</div>
+          <div style="display:flex;gap:var(--space-3);width:100%;">
+            <input class="input-field flex-1" id="settings-username" placeholder="New username…" maxlength="30" />
+            <button class="btn btn-glass btn-sm" id="settings-save-username">Save</button>
+          </div>
+        </div>
+        <div class="export-data-section" style="margin-top:var(--space-3);">
+          <div class="export-data-info">
+            <div class="export-data-title">Export My Data</div>
+            <div class="export-data-desc">Download a JSON copy of all your CaribFlow data.</div>
+          </div>
+          <button class="btn btn-glass btn-sm" id="export-data-btn">⬇ Export</button>
+        </div>
+      </div>
+
+      <!-- ABOUT DEVELOPER -->
+      <div class="settings-section">
+        <div class="settings-section-title">About</div>
+        <div class="settings-row" style="cursor:pointer;" id="about-dev-row">
+          <div>
+            <div style="font-size:var(--text-base);font-weight:var(--fw-medium);">About the Developer</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);">Created by Dakarie Green 🇯🇲</div>
+          </div>
+          <span style="color:var(--accent-color);">→</span>
+        </div>
+        <div class="settings-row" style="justify-content:center;">
+          <div style="text-align:center;font-size:var(--text-xs);color:var(--text-muted);">
+            CaribFlow v1.0.0 · Built for Caribbean students<br/>CSEC · CAPE · City & Guilds
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:var(--space-4);">
+          <button class="btn btn-danger btn-sm" id="settings-logout">Sign Out</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ ABOUT DEVELOPER MODAL ══════════ -->
+  <div id="about-dev-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-box" style="position:static;">
+      <div class="modal-header">
+        <h3 class="modal-title">About the Developer</h3>
+        <button class="modal-close" id="about-dev-close">✕</button>
+      </div>
+      <div class="about-dev-content">
+        <div class="about-dev-avatar">🇯🇲</div>
+        <p class="about-dev-text">
+          "Created by Dakarie Green from Jamaica. Dakarie created this platform to help Caribbean students navigate school successfully. Dealing with ADHD and experiencing struggles in school inspired him to build an organised, clean system to reduce cognitive load and help others succeed."
+        </p>
+        <div class="about-dev-socials">
+          <a class="about-dev-social-link" href="https://tiktok.com/@dakarie.yg" target="_blank" rel="noopener">
+            <span style="font-size:1.3rem;">🎵</span><span>TikTok: <strong>@dakarie.yg</strong></span>
+          </a>
+          <a class="about-dev-social-link" href="https://instagram.com/zjn.yg" target="_blank" rel="noopener">
+            <span style="font-size:1.3rem;">📸</span><span>Instagram: <strong>@zjn.yg</strong></span>
+          </a>
+          <a class="about-dev-social-link" href="https://youtube.com/@Dakarie" target="_blank" rel="noopener">
+            <span style="font-size:1.3rem;">▶️</span><span>YouTube: <strong>@Dakarie</strong></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BOTTOM NAV ══════════ -->
+  <nav class="nav-bar" role="navigation" aria-label="Main navigation">
+    <a href="./dashboard.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="./dashboard.html#study" class="nav-item">
+      <span class="nav-icon">🧠</span>
+      <span class="nav-label">Study</span>
+    </a>
+    <a href="./dashboard.html#leaderboard" class="nav-item">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Ranks</span>
+    </a>
+    <a href="./profile.html" class="nav-item active">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="./js/supabase-client.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/gamification.js"></script>
+
+  <script>
+  /* ── PROFILE PAGE CONTROLLER ─────────────────────────────── */
+  (function () {
+
+    // ── TOAST ────────────────────────────────────────────────
+    function showToast(msg, type = "info", duration = 4000) {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const icons = { success:"✅", error:"❌", warning:"⚠️", info:"ℹ️" };
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span class="toast-icon">${icons[type]||"ℹ️"}</span><span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), duration);
+    }
+
+    function updateIsland(icon, label) {
+      const island = document.getElementById("dynamic-island");
+      if (!island) return;
+      island.querySelector(".island-icon").textContent = icon;
+      island.querySelector(".island-label").textContent = label;
+    }
+
+    // ── POPULATE HERO ─────────────────────────────────────────
+    function populateProfile() {
+      const session = window.CF_SESSION;
+      if (!session?.isReady) return;
+      const { profile, inventory, stats, pet } = session;
+
+      // Avatar
+      const avatarImg = document.getElementById("profile-avatar-img");
+      if (avatarImg && profile?.pfp_url) avatarImg.src = profile.pfp_url;
+
+      // Username
+      const nameEl = document.getElementById("profile-username-display");
+      if (nameEl) nameEl.textContent = profile?.username || "User";
+
+      // Island
+      updateIsland("👤", profile?.username || "Profile");
+
+      // Equipped title
+      if (inventory?.equipped_title) {
+        const titleEl = document.getElementById("profile-title-display");
+        const titleTxt = document.getElementById("profile-title-text");
+        if (titleEl)  titleEl.style.display = "inline-flex";
+        if (titleTxt) titleTxt.textContent  = formatTitle(inventory.equipped_title);
+      }
+
+      // Equipped badge
+      renderProfileBadges(inventory);
+
+      // Stats
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set("prof-stat-level",   stats?.level             || 1);
+      set("prof-stat-streak",  stats?.current_streak    || 0);
+      set("prof-stat-xp",      (stats?.total_xp || 0).toLocaleString());
+      set("prof-stat-longest", stats?.longest_streak    || 0);
+
+      // XP bar
+      if (stats) {
+        const { level, current, needed, pct } = window.CF_Gamification.xpProgressInLevel(stats.total_xp || 0);
+        const fillEl = document.getElementById("prof-xp-fill");
+        if (fillEl) fillEl.style.width = `${pct}%`;
+        const lvLbl = document.getElementById("prof-xp-level-label"); if (lvLbl) lvLbl.textContent = `LVL ${level}`;
+        const pctLbl = document.getElementById("prof-xp-pct"); if (pctLbl) pctLbl.textContent = `${pct}%`;
+      }
+
+      // Joined
+      const joinedEl = document.getElementById("profile-joined");
+      if (joinedEl && profile?.created_at) {
+        joinedEl.textContent = `Joined ${new Date(profile.created_at).toLocaleDateString("en-JM",{year:"numeric",month:"long"})}`;
+      }
+
+      // Streak widget
+      set("w-streak-count", stats?.current_streak || 0);
+      set("w-freeze-count", `🧊 ${stats?.streak_freezes_owned || 0} Freezes`);
+
+      // Currency widget
+      const isOwner = window.CARIBFLOW_CLEARANCE_STATE === "owner";
+      set("w-coins",    isOwner ? "999,999" : (inventory?.coins_balance    || 0).toLocaleString());
+      set("w-diamonds", isOwner ? "999,999" : (inventory?.diamonds_balance || 0).toLocaleString());
+
+      // Owner crown indicator
+      if (isOwner) {
+        const crown = document.createElement("div");
+        crown.className = "owner-crown";
+        crown.innerHTML = "👑 Owner";
+        nameEl?.parentNode?.insertBefore(crown, nameEl.nextSibling);
+      }
+
+      // Pet widget
+      if (pet) {
+        const stageAssets = { 1:"./assets/images/avatars/cari_stage1.png", 2:"./assets/images/avatars/cari_stage2.png", 3:"./assets/images/avatars/cari_stage3.png" };
+        const stageLabels = { 1:"🥚 Stage 1 — Baby Blob", 2:"🐣 Stage 2 — Juvenile", 3:"🦋 Stage 3 — Protector" };
+        const img = document.getElementById("prof-mascot-img");
+        if (img) img.src = stageAssets[pet.evolution_stage || 1];
+        set("prof-pet-name",  pet.pet_name  || "Cari");
+        set("prof-pet-stage", stageLabels[pet.evolution_stage || 1]);
+        set("prof-pet-level", pet.pet_level || 1);
+        const petFill = document.getElementById("prof-pet-xp-fill");
+        if (petFill) {
+          const lvXP  = Math.pow(pet.pet_level || 1, 2) * 40;
+          const nxtXP = Math.pow((pet.pet_level || 1) + 1, 2) * 40;
+          petFill.style.width = `${Math.min(100, Math.max(0, ((pet.pet_xp||0) - lvXP) / (nxtXP - lvXP) * 100))}%`;
+        }
+      }
+
+      // Subject ranks
+      populateSubjectRanks();
+
+      // Achievements preview
+      populateAchievementsPreview();
+
+      // Cosmetics
+      renderCosmeticsTab("badges");
+    }
+
+    function formatTitle(key) {
+      return key.replace(/_/g," ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function renderProfileBadges(inventory) {
+      const row = document.getElementById("profile-badge-row");
+      if (!row || !inventory) return;
+      row.innerHTML = "";
+      const equipped = inventory.equipped_badge;
+      if (equipped) {
+        const img = document.createElement("img");
+        img.src   = `./assets/images/badges/${equipped}.png`;
+        img.alt   = equipped;
+        img.className = "profile-badge-item";
+        img.title = formatTitle(equipped);
+        row.appendChild(img);
+      }
+    }
+
+    async function populateSubjectRanks() {
+      const list = document.getElementById("w-subjects-list");
+      if (!list || !window.CF_SESSION?.user) return;
+      list.innerHTML = `<div class="skeleton" style="height:40px;margin-bottom:8px;"></div>`.repeat(3);
+      const ranks = await CF_DB.SubjectRanks.getAll(window.CF_SESSION.user.id);
+      if (!ranks.length) {
+        list.innerHTML = `<div class="empty-state" style="padding:var(--space-4)"><div class="empty-title" style="font-size:var(--text-sm)">No subject data yet</div></div>`;
+        return;
+      }
+      list.innerHTML = ranks.slice(0,5).map(r => `
+        <div class="subject-rank-card">
+          <div class="subject-rank-icon">${getSubjectIcon(r.subject_id)}</div>
+          <div class="subject-rank-info">
+            <div class="subject-rank-name">${formatTitle(r.subject_id.replace("csec_","").replace("cape_","").replace("cg_",""))}</div>
+            <div class="subject-rank-xp">${r.subject_xp} XP · ${r.quizzes_completed} quizzes</div>
+          </div>
+          <div class="subject-rank-level">LVL ${Math.floor(r.subject_xp / 100) + 1}</div>
+        </div>`).join("");
+    }
+
+    function getSubjectIcon(id) {
+      const map = { csec_poa:"🧾",csec_it:"💻",csec_maths:"➗",csec_physics:"⚡",csec_english:"📝",csec_bio:"🧬",csec_chem:"⚗️",cape_econ:"📊",cg_english:"📖" };
+      return map[id] || "📚";
+    }
+
+    async function populateAchievementsPreview() {
+      const preview = document.getElementById("w-achievements-preview");
+      if (!preview || !window.CF_SESSION?.user) return;
+      const { stats, inventory, pet } = window.CF_SESSION;
+      const subjects = await CF_DB.SubjectRanks.getAll(window.CF_SESSION.user.id);
+      const { completed, inProgress } = window.CF_Gamification.evaluateAchievements(stats, inventory, subjects, pet);
+
+      const shown = [...completed.slice(0,2), ...inProgress.slice(0,1)];
+      if (!shown.length) {
+        preview.innerHTML = `<div class="empty-state" style="padding:var(--space-4)"><div class="empty-title" style="font-size:var(--text-sm)">No achievements yet — keep studying!</div></div>`;
+        return;
+      }
+      preview.innerHTML = shown.map(a => {
+        const cls = a.earned ? "achievement-completed" : "achievement-in-progress";
+        const progressBar = (!a.earned && a.progress != null)
+          ? `<div class="progress-track thin" style="margin-top:var(--space-2)"><div class="progress-fill" style="width:${Math.min(100,Math.round(a.progress/a.target*100))}%"></div></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">${a.progress}/${a.target}</div>`
+          : "";
+        return `<div class="achievement-card ${cls}" style="margin-bottom:var(--space-2);">
+          <div class="achievement-icon">${a.icon}</div>
+          <div class="achievement-info">
+            <div class="achievement-name">${a.name}</div>
+            <div class="achievement-desc">${a.description}</div>
+            ${progressBar}
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    async function openAllAchievements() {
+      const modal   = document.getElementById("achievements-modal");
+      const content = document.getElementById("ach-modal-content");
+      modal.style.display = "flex";
+      content.innerHTML = `<div class="skeleton" style="height:80px;margin-bottom:8px;"></div>`.repeat(5);
+
+      if (!window.CF_SESSION?.user) return;
+      const { stats, inventory, pet } = window.CF_SESSION;
+      const subjects = await CF_DB.SubjectRanks.getAll(window.CF_SESSION.user.id);
+      const { completed, inProgress, locked } = window.CF_Gamification.evaluateAchievements(stats, inventory, subjects, pet);
+      let currentTab = "all";
+
+      function renderAchTab(tab) {
+        currentTab = tab;
+        let items;
+        if (tab === "all")         items = [...completed, ...inProgress, ...locked];
+        else if (tab === "completed")  items = completed;
+        else if (tab === "in-progress") items = inProgress;
+        else items = locked;
+
+        content.innerHTML = items.length ? items.map(a => {
+          const cls = a.earned ? "achievement-completed"
+            : (a.progress != null) ? "achievement-in-progress"
+            : "achievement-locked";
+          const progressBar = (cls === "achievement-in-progress" && a.progress != null)
+            ? `<div class="progress-track thin" style="margin-top:var(--space-2)"><div class="progress-fill" style="width:${Math.min(100,Math.round(a.progress/a.target*100))}%"></div></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px;">${a.progress}/${a.target}</div>`
+            : "";
+          const lockHint = cls === "achievement-locked"
+            ? `<div class="achievement-unlock-hint">🔒 ${a.unlockHint}</div>` : "";
+          return `<div class="achievement-card ${cls}" style="margin-bottom:var(--space-3);">
+            <div class="achievement-icon">${a.icon}</div>
+            <div class="achievement-info">
+              <div class="achievement-name">${a.name}</div>
+              <div class="achievement-desc">${a.description}</div>
+              ${progressBar}${lockHint}
+            </div>
+          </div>`;
+        }).join("") : `<div class="empty-state"><div class="empty-icon">🏅</div><div class="empty-title">None in this category yet</div></div>`;
+      }
+
+      renderAchTab("all");
+
+      document.querySelectorAll("[data-ach-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-ach-tab]").forEach(b=>b.classList.remove("active"));
+          btn.classList.add("active");
+          renderAchTab(btn.dataset.achTab);
+        });
+      });
+    }
+
+    function renderCosmeticsTab(tab) {
+      const container = document.getElementById("cosmetics-grid-container");
+      if (!container) return;
+      const inv = window.CF_SESSION?.inventory;
+      const isOwner = window.CARIBFLOW_CLEARANCE_STATE === "owner";
+
+      if (tab === "badges") {
+        const available = inv?.unlocked_badges || [];
+        const equipped  = inv?.equipped_badge;
+        container.innerHTML = `<div class="cosmetics-grid">
+          ${available.length ? available.map(key => {
+            const isOwnerItem = key === "owner_badge";
+            if (isOwnerItem && !isOwner) return "";
+            return `<div class="cosmetic-item ${equipped===key?"equipped":""}" data-badge="${key}">
+              <img src="./assets/images/badges/${key}.png" class="cosmetic-item-img" alt="${key}" onerror="this.style.display='none';this.parentNode.querySelector('.fallback-emoji').style.display='block';" />
+              <div class="fallback-emoji" style="display:none;font-size:2rem;">${isOwnerItem?"👑":"🏅"}</div>
+              <div class="cosmetic-item-name">${formatTitle(key.replace("_badge",""))}</div>
+              ${equipped===key ? `<span class="cosmetic-item-badge equipped-badge">Equipped</span>` : ""}
+              ${isOwnerItem ? `<span class="cosmetic-item-badge owner-badge">Owner</span>` : ""}
+            </div>`;
+          }).join("") : `<div class="empty-state" style="padding:var(--space-4);grid-column:span 3"><div class="empty-title" style="font-size:var(--text-sm)">No badges unlocked yet</div></div>`}
+        </div>`;
+
+        container.querySelectorAll("[data-badge]").forEach(el => {
+          el.addEventListener("click", async () => {
+            const key     = el.dataset.badge;
+            const current = inv?.equipped_badge;
+            const userId  = window.CF_SESSION?.user?.id;
+            if (!userId) return;
+            const newKey  = current === key ? null : key; // Toggle equip
+            await CF_DB.Inventory.equipBadge(userId, newKey);
+            window.CF_SESSION.inventory = await CF_DB.Inventory.get(userId);
+            renderCosmeticsTab("badges");
+            renderProfileBadges(window.CF_SESSION.inventory);
+            showToast(newKey ? `✅ Badge equipped: ${formatTitle(key.replace("_badge",""))}` : "Badge unequipped.", "success");
+          });
+        });
+
+      } else {
+        // Titles
+        const available = inv?.unlocked_titles || [];
+        const equipped  = inv?.equipped_title;
+        container.innerHTML = `<div style="display:flex;flex-direction:column;gap:var(--space-2);">
+          ${available.length ? available.map(key => {
+            const isOwnerItem = key === "owner_title";
+            if (isOwnerItem && !isOwner) return "";
+            return `<div class="settings-row" data-title="${key}" style="cursor:pointer;${equipped===key?"border-color:var(--accent-color);":""}">
+              <span style="font-weight:${equipped===key?700:400};">${formatTitle(key)}</span>
+              <div style="display:flex;align-items:center;gap:var(--space-2);">
+                ${isOwnerItem ? `<span class="cosmetic-item-badge owner-badge">Owner</span>` : ""}
+                ${equipped===key ? `<span class="cosmetic-item-badge equipped-badge">Equipped</span>` : `<span style="font-size:var(--text-xs);color:var(--accent-color);">Equip →</span>`}
+              </div>
+            </div>`;
+          }).join("") : `<div class="empty-state" style="padding:var(--space-4)"><div class="empty-title" style="font-size:var(--text-sm)">No titles unlocked yet</div></div>`}
+        </div>`;
+
+        container.querySelectorAll("[data-title]").forEach(el => {
+          el.addEventListener("click", async () => {
+            const key    = el.dataset.title;
+            const current = inv?.equipped_title;
+            const userId  = window.CF_SESSION?.user?.id;
+            if (!userId) return;
+            const newKey  = current === key ? null : key;
+            await CF_DB.Inventory.equipTitle(userId, newKey);
+            window.CF_SESSION.inventory = await CF_DB.Inventory.get(userId);
+            renderCosmeticsTab("titles");
+            const titleEl  = document.getElementById("profile-title-display");
+            const titleTxt = document.getElementById("profile-title-text");
+            if (newKey && titleEl && titleTxt) { titleEl.style.display="inline-flex"; titleTxt.textContent=formatTitle(newKey); }
+            else if (titleEl) titleEl.style.display="none";
+            showToast(newKey ? `✅ Title equipped: ${formatTitle(newKey)}` : "Title unequipped.", "success");
+          });
+        });
+      }
+    }
+
+    // ── DRAG & DROP GRID ────────────────────────────────────
+    let editMode   = false;
+    let dragSrc    = null;
+    const GRID_KEY = "cf_profile_grid_order";
+
+    function enableEditMode() {
+      editMode = true;
+      document.getElementById("edit-mode-bar").style.display = "flex";
+      document.querySelectorAll(".profile-widget").forEach(w => {
+        w.setAttribute("draggable","true");
+        w.classList.add("draggable");
+      });
+    }
+
+    function disableEditMode() {
+      editMode = false;
+      document.getElementById("edit-mode-bar").style.display = "none";
+      document.querySelectorAll(".profile-widget").forEach(w => {
+        w.setAttribute("draggable","false");
+        w.classList.remove("draggable","drag-active","drag-over");
+      });
+    }
+
+    function saveGridOrder() {
+      const order = [...document.querySelectorAll(".profile-widget")].map(w => w.dataset.widget);
+      localStorage.setItem(GRID_KEY, JSON.stringify(order));
+      // Sync to Supabase if available
+      const userId = window.CF_SESSION?.user?.id;
+      if (userId) CF_DB.Users.update(userId, { grid_order: order.join(",") });
+      showToast("✅ Layout saved!", "success");
+      disableEditMode();
+    }
+
+    function restoreGridOrder() {
+      const saved = localStorage.getItem(GRID_KEY);
+      if (!saved) return;
+      const order = JSON.parse(saved);
+      const grid  = document.getElementById("profile-grid");
+      const widgets = [...grid.querySelectorAll(".profile-widget")];
+      order.forEach(widgetId => {
+        const w = widgets.find(el => el.dataset.widget === widgetId);
+        if (w) grid.appendChild(w);
+      });
+    }
+
+    document.getElementById("edit-layout-btn").addEventListener("click", enableEditMode);
+    document.getElementById("edit-mode-save").addEventListener("click", saveGridOrder);
+
+    document.querySelectorAll(".profile-widget").forEach(widget => {
+      widget.addEventListener("dragstart", e => {
+        if (!editMode) return;
+        dragSrc = widget;
+        widget.classList.add("drag-active");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      widget.addEventListener("dragend", () => {
+        widget.classList.remove("drag-active","drag-over");
+      });
+      widget.addEventListener("dragover", e => {
+        if (!editMode || !dragSrc || dragSrc === widget) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        document.querySelectorAll(".profile-widget").forEach(w=>w.classList.remove("drag-over"));
+        widget.classList.add("drag-over");
+      });
+      widget.addEventListener("drop", e => {
+        if (!editMode || !dragSrc || dragSrc === widget) return;
+        e.preventDefault();
+        const grid = document.getElementById("profile-grid");
+        const children = [...grid.children];
+        const fromIdx  = children.indexOf(dragSrc);
+        const toIdx    = children.indexOf(widget);
+        if (fromIdx < toIdx) grid.insertBefore(dragSrc, widget.nextSibling);
+        else grid.insertBefore(dragSrc, widget);
+        widget.classList.remove("drag-over");
+        dragSrc = null;
+      });
+    });
+
+    // ── SETTINGS ─────────────────────────────────────────────
+    const settingsModal = document.getElementById("settings-modal");
+    document.getElementById("settings-open-btn").addEventListener("click", () => {
+      settingsModal.style.display = "block";
+      // Restore current theme/accent selections
+      const currentTheme  = document.documentElement.getAttribute("data-theme")  || "dark";
+      const currentAccent = document.documentElement.getAttribute("data-accent") || "ocean";
+      const isDyslexic    = document.documentElement.getAttribute("data-dyslexic") === "true";
+      const isPrivate     = window.CF_SESSION?.profile?.is_private || false;
+
+      document.querySelectorAll(".theme-option").forEach(el => el.classList.toggle("selected", el.dataset.theme === currentTheme));
+      document.querySelectorAll(".accent-swatch").forEach(el => el.classList.toggle("selected", el.dataset.accent === currentAccent));
+      document.getElementById("dyslexic-toggle").checked = isDyslexic;
+      document.getElementById("privacy-toggle").checked  = isPrivate;
+      const unameInput = document.getElementById("settings-username");
+      if (unameInput) unameInput.value = window.CF_SESSION?.profile?.username || "";
+    });
+
+    document.getElementById("settings-close-btn").addEventListener("click", () => { settingsModal.style.display = "none"; });
+
+    // Theme select
+    document.querySelectorAll(".theme-option").forEach(el => {
+      el.addEventListener("click", () => {
+        const t = el.dataset.theme;
+        document.documentElement.setAttribute("data-theme", t);
+        localStorage.setItem("cf_theme", t);
+        document.querySelectorAll(".theme-option").forEach(o=>o.classList.toggle("selected", o.dataset.theme===t));
+        showToast(`Theme: ${t}`, "info", 1500);
+      });
+    });
+
+    // Accent select
+    document.querySelectorAll(".accent-swatch").forEach(el => {
+      el.addEventListener("click", () => {
+        const a = el.dataset.accent;
+        document.documentElement.setAttribute("data-accent", a);
+        localStorage.setItem("cf_accent", a);
+        document.querySelectorAll(".accent-swatch").forEach(o=>o.classList.toggle("selected", o.dataset.accent===a));
+        showToast(`Accent: ${a}`, "info", 1500);
+      });
+    });
+
+    // Dyslexic toggle
+    document.getElementById("dyslexic-toggle").addEventListener("change", e => {
+      const on = e.target.checked;
+      if (on) document.documentElement.setAttribute("data-dyslexic","true");
+      else document.documentElement.removeAttribute("data-dyslexic");
+      localStorage.setItem("cf_dyslexic", on);
+      showToast(`Dyslexic font ${on?"enabled":"disabled"}`, "info", 1500);
+    });
+
+    // Privacy toggle
+    document.getElementById("privacy-toggle").addEventListener("change", async e => {
+      const priv = e.target.checked;
+      const userId = window.CF_SESSION?.user?.id;
+      if (!userId) return;
+      await CF_DB.Users.update(userId, { is_private: priv });
+      if (window.CF_SESSION.profile) window.CF_SESSION.profile.is_private = priv;
+      showToast(`Profile set to ${priv?"private":"public"}.`, "info");
+    });
+
+    // Save username
+    document.getElementById("settings-save-username").addEventListener("click", async () => {
+      const newName = document.getElementById("settings-username").value.trim();
+      if (!newName || newName.length < 3) { showToast("Username must be at least 3 chars.", "error"); return; }
+      const userId = window.CF_SESSION?.user?.id;
+      if (!userId) return;
+      const existing = await CF_DB.Users.getByUsername(newName);
+      if (existing && existing.uuid !== userId) { showToast("Username already taken.", "error"); return; }
+      await CF_DB.Users.update(userId, { username: newName });
+      if (window.CF_SESSION.profile) window.CF_SESSION.profile.username = newName;
+      document.getElementById("profile-username-display").textContent = newName;
+      showToast("✅ Username updated!", "success");
+    });
+
+    // Logout
+    document.getElementById("settings-logout").addEventListener("click", async () => {
+      if (confirm("Sign out of CaribFlow?")) await CF_Auth.signOut();
+    });
+
+    // Export data
+    document.getElementById("export-data-btn").addEventListener("click", () => {
+      const data = {
+        profile:   window.CF_SESSION?.profile,
+        stats:     window.CF_SESSION?.stats,
+        inventory: window.CF_SESSION?.inventory,
+        pet:       window.CF_SESSION?.pet,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a    = document.createElement("a");
+      a.href     = URL.createObjectURL(blob);
+      a.download = "caribflow_my_data.json";
+      a.click();
+      showToast("📤 Data exported!", "success");
+    });
+
+    // About Developer
+    document.getElementById("about-dev-row").addEventListener("click", () => {
+      document.getElementById("about-dev-modal").style.display = "flex";
+    });
+    document.getElementById("about-dev-close").addEventListener("click", () => {
+      document.getElementById("about-dev-modal").style.display = "none";
+    });
+    document.getElementById("about-dev-modal").addEventListener("click", e => {
+      if (e.target === document.getElementById("about-dev-modal"))
+        document.getElementById("about-dev-modal").style.display = "none";
+    });
+
+    // Achievements modal
+    document.getElementById("view-all-achievements").addEventListener("click", openAllAchievements);
+    document.getElementById("ach-modal-close").addEventListener("click", () => {
+      document.getElementById("achievements-modal").style.display = "none";
+    });
+    document.getElementById("achievements-modal").addEventListener("click", e => {
+      if (e.target === document.getElementById("achievements-modal"))
+        document.getElementById("achievements-modal").style.display = "none";
+    });
+
+    // Cosmetics tabs
+    document.querySelectorAll("[data-cos]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-cos]").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        renderCosmeticsTab(btn.dataset.cos);
+      });
+    });
+
+    // Rename pet
+    document.getElementById("rename-pet-btn").addEventListener("click", async () => {
+      const name = prompt("Give Cari a new name (max 24 chars):");
+      if (!name || !name.trim()) return;
+      const userId = window.CF_SESSION?.user?.id;
+      if (!userId) return;
+      await CF_DB.PetSystem.rename(userId, name.trim());
+      window.CF_SESSION.pet = await CF_DB.PetSystem.get(userId);
+      document.getElementById("prof-pet-name").textContent = name.trim();
+      showToast(`✅ Cari renamed to "${name.trim()}"!`, "success");
+    });
+
+    // PFP upload
+    document.getElementById("pfp-edit-btn").addEventListener("click", () => {
+      document.getElementById("pfp-file-input").click();
+    });
+    document.getElementById("pfp-file-input").addEventListener("change", async (e) => {
+      const file   = e.target.files[0];
+      const userId = window.CF_SESSION?.user?.id;
+      if (!file || !userId) return;
+      showToast("Uploading photo…", "info");
+      const url = await CF_DB.Users.uploadPFP(userId, file);
+      if (url) {
+        document.getElementById("profile-avatar-img").src = url;
+        if (window.CF_SESSION.profile) window.CF_SESSION.profile.pfp_url = url;
+        showToast("✅ Profile picture updated!", "success");
+      } else {
+        showToast("Upload failed — check your connection.", "error");
+      }
+    });
+
+    // ── INIT ─────────────────────────────────────────────────
+    async function init() {
+      const ok = await window.CF_requireAuth();
+      if (!ok) return;
+
+      document.addEventListener("cf:session_ready", () => {
+        populateProfile();
+        restoreGridOrder();
+      });
+
+      if (window.CF_SESSION?.isReady) {
+        populateProfile();
+        restoreGridOrder();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof CF_DB !== "undefined") init();
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

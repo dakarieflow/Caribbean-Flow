@@ -1,0 +1,93 @@
+{
+  "name": "CaribFlow — Caribbean Study Platform",
+  "short_name": "CaribFlow",
+  "description": "The ultimate study platform for CSEC, CAPE & City & Guilds students across the Caribbean. Flashcards, quizzes, gamification, and more.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#0071e3",
+  "lang": "en-JM",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "./assets/images/brand/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/brand/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/brand/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/brand/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/images/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/images/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./assets/images/ui/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "CaribFlow Dashboard"
+    },
+    {
+      "src": "./assets/images/ui/screenshot-desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "CaribFlow Desktop View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Quiz",
+      "short_name": "Quiz",
+      "description": "Jump straight into a practice quiz",
+      "url": "./dashboard.html?tool=quiz",
+      "icons": [{ "src": "./assets/images/brand/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Open Flashcards",
+      "short_name": "Flashcards",
+      "description": "Review your spaced repetition flashcards",
+      "url": "./dashboard.html?tool=flashcards",
+      "icons": [{ "src": "./assets/images/brand/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "description": "View your profile and achievements",
+      "url": "./profile.html",
+      "icons": [{ "src": "./assets/images/brand/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

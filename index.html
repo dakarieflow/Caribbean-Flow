@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="CaribFlow — The ultimate Caribbean exam study platform for CSEC, CAPE & City & Guilds students." />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <title>CaribFlow — Study Smarter</title>
+
+  <link rel="icon" type="image/png" href="./assets/images/brand/favicon.png" />
+  <link rel="apple-touch-icon" href="./assets/images/brand/apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.json" />
+
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+
+  <style>
+    /* ── Index-specific layout ───────────────────── */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      overflow-x: hidden;
+    }
+
+    /* Ambient background orbs */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: float 8s ease-in-out infinite;
+    }
+    .bg-orb-1 {
+      width: 500px; height: 500px;
+      background: var(--accent-glow);
+      top: -200px; left: -200px;
+      animation-delay: 0s;
+    }
+    .bg-orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(155, 89, 182, 0.15);
+      bottom: -150px; right: -150px;
+      animation-delay: -4s;
+    }
+    .bg-orb-3 {
+      width: 300px; height: 300px;
+      background: rgba(52, 199, 89, 0.08);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -2s;
+    }
+
+    /* Auth container */
+    .auth-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
+    }
+
+    /* Brand header */
+    .brand-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      text-align: center;
+    }
+    .brand-logo {
+      width: 80px; height: 80px;
+      border-radius: var(--radius-xl);
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 12px 40px var(--accent-glow);
+      animation: bounceIn 0.6s var(--ease-bounce);
+    }
+    .brand-name {
+      font-size: var(--text-2xl);
+      font-weight: var(--fw-heavy);
+      color: var(--text-main);
+      letter-spacing: -0.03em;
+    }
+    .brand-name span { color: var(--accent-color); }
+    .brand-tagline {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      max-width: 280px;
+    }
+
+    /* Auth card */
+    .auth-card {
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      box-shadow: var(--glass-shadow-xl);
+      animation: scaleIn 0.4s var(--ease-bounce);
+    }
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    }
+
+    /* Tab switcher */
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-pill);
+      margin-bottom: var(--space-6);
+    }
+    .auth-tab-btn {
+      flex: 1;
+      padding: 9px;
+      border-radius: var(--radius-pill);
+      font-size: var(--text-sm);
+      font-weight: var(--fw-semibold);
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+    .auth-tab-btn.active {
+      background: var(--accent-color);
+      color: white;
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    /* Form */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .auth-form .input-group { gap: var(--space-1); }
+
+    /* Divider */
+    .auth-or {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: var(--space-2) 0;
+    }
+    .auth-or span {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .auth-or::before, .auth-or::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--divider);
+    }
+
+    /* Forgot password */
+    .auth-forgot {
+      font-size: var(--text-xs);
+      color: var(--accent-color);
+      text-align: right;
+      cursor: pointer;
+      margin-top: calc(-1 * var(--space-2));
+    }
+    .auth-forgot:hover { opacity: 0.7; }
+
+    /* Terms */
+    .auth-terms {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: var(--space-2);
+    }
+    .auth-terms a { color: var(--accent-color); }
+
+    /* Error banner */
+    .auth-error {
+      background: rgba(255,59,48,0.12);
+      border: 1px solid rgba(255,59,48,0.3);
+      border-radius: var(--radius-apple);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--color-error);
+      display: none;
+    }
+    .auth-error.visible { display: block; animation: slideDown 0.2s ease; }
+
+    /* Password strength */
+    .pw-strength {
+      height: 4px;
+      border-radius: var(--radius-pill);
+      background: var(--glass-border);
+      margin-top: var(--space-1);
+      overflow: hidden;
+    }
+    .pw-strength-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      width: 0%;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+    .pw-strength-fill.weak   { width: 33%; background: var(--color-error); }
+    .pw-strength-fill.medium { width: 66%; background: var(--color-warning); }
+    .pw-strength-fill.strong { width: 100%; background: var(--color-success); }
+
+    /* Social proof strip */
+    .auth-social-proof {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .proof-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background ambient orbs -->
+  <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+
+  <!-- Dynamic Island -->
+  <div id="dynamic-island" role="status" aria-live="polite">
+    <span class="island-icon">🌊</span>
+    <span class="island-label">CaribFlow</span>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" aria-live="assertive"></div>
+
+  <!-- ══════════ LAUNCH AD MODAL ══════════ -->
+  <div id="ad-modal" class="modal-overlay centered" role="dialog" aria-modal="true" aria-labelledby="ad-modal-title">
+    <div class="ad-modal-box">
+      <button class="modal-close" id="ad-close-btn" aria-label="Close">✕</button>
+
+      <div class="ad-logo" aria-hidden="true">🌊</div>
+
+      <h2 id="ad-modal-title" style="font-size:var(--text-xl);font-weight:var(--fw-heavy);margin-bottom:var(--space-2);">
+        Welcome to CaribFlow
+      </h2>
+      <p style="font-size:var(--text-sm);color:var(--text-muted);margin-bottom:var(--space-4);">
+        The #1 study platform built for Caribbean students. Follow the creator and unlock your potential.
+      </p>
+
+      <div class="ad-social-links">
+        <a class="ad-social-link" href="https://tiktok.com/@dakarie.yg" target="_blank" rel="noopener">
+          <span style="font-size:1.3rem;">🎵</span>
+          <span>TikTok: <strong>@dakarie.yg</strong></span>
+        </a>
+        <a class="ad-social-link" href="https://instagram.com/zjn.yg" target="_blank" rel="noopener">
+          <span style="font-size:1.3rem;">📸</span>
+          <span>Instagram: <strong>@zjn.yg</strong></span>
+        </a>
+        <a class="ad-social-link" href="https://youtube.com/@Dakarie" target="_blank" rel="noopener">
+          <span style="font-size:1.3rem;">▶️</span>
+          <span>YouTube: <strong>@Dakarie</strong></span>
+        </a>
+      </div>
+
+      <div style="margin:var(--space-4) 0;padding:var(--space-4);background:var(--accent-subtle);border:1px solid var(--accent-color);border-radius:var(--radius-apple);text-align:left;">
+        <p style="font-size:var(--text-sm);font-weight:var(--fw-semibold);color:var(--accent-color);margin-bottom:var(--space-2);">👑 Unlock Premium</p>
+        <p style="font-size:var(--text-xs);color:var(--text-muted);margin:0;">Get 1,000+ practice questions, PDF annotation, graphing calculator, cloud sync, and more.</p>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="ad-enter-btn">Start Studying Free →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ AUTH WRAPPER ══════════ -->
+  <main class="auth-wrapper" id="auth-section" style="display:none;">
+
+    <!-- Brand -->
+    <div class="brand-section">
+      <div class="brand-logo" aria-hidden="true">🌊</div>
+      <h1 class="brand-name">Carib<span>Flow</span></h1>
+      <p class="brand-tagline">CSEC · CAPE · City & Guilds — All in one place.</p>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card" style="position:relative;">
+      <!-- Tab switcher -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab-btn active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login">Log In</button>
+        <button class="auth-tab-btn" id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup">Sign Up</button>
+      </div>
+
+      <!-- Error Banner -->
+      <div class="auth-error" id="auth-error" role="alert"></div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div id="panel-login" role="tabpanel">
+        <form class="auth-form" id="login-form" novalidate>
+          <div class="input-group">
+            <label class="input-label" for="login-email">Email Address</label>
+            <input class="input-field" type="email" id="login-email" name="email"
+              placeholder="you@example.com" autocomplete="email" required />
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="login-password">Password</label>
+            <div class="input-password-wrap">
+              <input class="input-field" type="password" id="login-password" name="password"
+                placeholder="••••••••" autocomplete="current-password" required />
+              <button type="button" class="input-password-toggle" data-target="login-password" aria-label="Toggle password">👁</button>
+            </div>
+          </div>
+          <button type="button" class="auth-forgot" id="forgot-btn">Forgot password?</button>
+          <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+            <span class="btn-text">Log In</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- ── SIGNUP PANEL ── -->
+      <div id="panel-signup" role="tabpanel" style="display:none;">
+        <form class="auth-form" id="signup-form" novalidate>
+          <div class="input-group">
+            <label class="input-label" for="signup-username">Username</label>
+            <input class="input-field" type="text" id="signup-username" name="username"
+              placeholder="caribstudent99" maxlength="30"
+              autocomplete="username" required />
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="signup-email">Email Address</label>
+            <input class="input-field" type="email" id="signup-email" name="email"
+              placeholder="you@example.com" autocomplete="email" required />
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="signup-password">Password</label>
+            <div class="input-password-wrap">
+              <input class="input-field" type="password" id="signup-password" name="password"
+                placeholder="••••••••" autocomplete="new-password" minlength="6" required />
+              <button type="button" class="input-password-toggle" data-target="signup-password" aria-label="Toggle password">👁</button>
+            </div>
+            <div class="pw-strength"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="signup-btn">
+            <span class="btn-text">Create Account</span>
+          </button>
+          <p class="auth-terms">
+            By signing up you agree to our
+            <a href="#" onclick="return false;">Terms</a> &
+            <a href="#" onclick="return false;">Privacy Policy</a>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Social proof -->
+    <div class="auth-social-proof">
+      <div class="proof-chip"><span>🇯🇲</span> Made in Jamaica</div>
+      <div class="proof-chip"><span>📚</span> CSEC · CAPE · C&G</div>
+      <div class="proof-chip"><span>🔒</span> Free to start</div>
+    </div>
+
+  </main>
+
+  <!-- ══════════ FORGOT PASSWORD MODAL ══════════ -->
+  <div id="forgot-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-box" style="position:static;animation:scaleIn 0.25s var(--ease-bounce);">
+      <div class="modal-header">
+        <h3 class="modal-title">Reset Password</h3>
+        <button class="modal-close" id="forgot-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:var(--text-sm);color:var(--text-muted);margin-bottom:var(--space-4);">Enter your email and we'll send a reset link.</p>
+        <div class="input-group">
+          <label class="input-label" for="reset-email">Email Address</label>
+          <input class="input-field" type="email" id="reset-email" placeholder="you@example.com" />
+        </div>
+        <div class="auth-error" id="reset-error" style="margin-top:var(--space-3);"></div>
+        <div id="reset-success" style="display:none;margin-top:var(--space-3);padding:var(--space-3) var(--space-4);background:rgba(52,199,89,0.12);border:1px solid rgba(52,199,89,0.3);border-radius:var(--radius-apple);font-size:var(--text-sm);color:var(--color-success);">
+          ✅ Check your inbox for the reset link.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-glass" id="forgot-cancel">Cancel</button>
+        <button class="btn btn-primary" id="reset-submit">Send Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="./js/supabase-client.js"></script>
+  <script src="./js/auth.js"></script>
+
+  <script>
+  /* ── INDEX.HTML CONTROLLER ─────────────────────────────── */
+  (function () {
+
+    // ── DOM refs ──────────────────────────────────────────
+    const adModal       = document.getElementById("ad-modal");
+    const adCloseBtn    = document.getElementById("ad-close-btn");
+    const adEnterBtn    = document.getElementById("ad-enter-btn");
+    const authSection   = document.getElementById("auth-section");
+    const island        = document.getElementById("dynamic-island");
+
+    const tabLogin      = document.getElementById("tab-login");
+    const tabSignup     = document.getElementById("tab-signup");
+    const panelLogin    = document.getElementById("panel-login");
+    const panelSignup   = document.getElementById("panel-signup");
+
+    const loginForm     = document.getElementById("login-form");
+    const signupForm    = document.getElementById("signup-form");
+    const loginBtn      = document.getElementById("login-btn");
+    const signupBtn     = document.getElementById("signup-btn");
+    const authError     = document.getElementById("auth-error");
+
+    const forgotBtn     = document.getElementById("forgot-btn");
+    const forgotModal   = document.getElementById("forgot-modal");
+    const forgotClose   = document.getElementById("forgot-close");
+    const forgotCancel  = document.getElementById("forgot-cancel");
+    const resetSubmit   = document.getElementById("reset-submit");
+    const resetEmail    = document.getElementById("reset-email");
+    const resetError    = document.getElementById("reset-error");
+    const resetSuccess  = document.getElementById("reset-success");
+    const pwFill        = document.getElementById("pw-strength-fill");
+
+    // ── Ad modal dismiss ──────────────────────────────────
+    function dismissAd() {
+      adModal.style.animation = "fadeOut 0.25s ease forwards";
+      setTimeout(() => {
+        adModal.style.display = "none";
+        authSection.style.display = "flex";
+        authSection.classList.add("page-enter");
+      }, 250);
+    }
+    adCloseBtn.addEventListener("click", dismissAd);
+    adEnterBtn.addEventListener("click", dismissAd);
+    adModal.addEventListener("click", e => { if (e.target === adModal) dismissAd(); });
+
+    // ── Tab switch ────────────────────────────────────────
+    function switchTab(tab) {
+      if (tab === "login") {
+        tabLogin.classList.add("active");
+        tabSignup.classList.remove("active");
+        panelLogin.style.display = "block";
+        panelSignup.style.display = "none";
+        tabLogin.setAttribute("aria-selected", "true");
+        tabSignup.setAttribute("aria-selected", "false");
+      } else {
+        tabSignup.classList.add("active");
+        tabLogin.classList.remove("active");
+        panelSignup.style.display = "block";
+        panelLogin.style.display = "none";
+        tabSignup.setAttribute("aria-selected", "true");
+        tabLogin.setAttribute("aria-selected", "false");
+      }
+      clearError();
+    }
+    tabLogin.addEventListener("click",  () => switchTab("login"));
+    tabSignup.addEventListener("click", () => switchTab("signup"));
+
+    // ── Error display ─────────────────────────────────────
+    function showError(msg) {
+      authError.textContent = msg;
+      authError.classList.add("visible");
+    }
+    function clearError() {
+      authError.classList.remove("visible");
+      authError.textContent = "";
+    }
+
+    // ── Password strength ─────────────────────────────────
+    document.getElementById("signup-password").addEventListener("input", function () {
+      const val = this.value;
+      pwFill.className = "pw-strength-fill";
+      if (val.length >= 10 && /[A-Z]/.test(val) && /[0-9]/.test(val)) {
+        pwFill.classList.add("strong");
+      } else if (val.length >= 6) {
+        pwFill.classList.add("medium");
+      } else if (val.length > 0) {
+        pwFill.classList.add("weak");
+      }
+    });
+
+    // ── Password toggle visibility ────────────────────────
+    document.querySelectorAll(".input-password-toggle").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = document.getElementById(btn.dataset.target);
+        if (!target) return;
+        target.type = target.type === "password" ? "text" : "password";
+        btn.textContent = target.type === "password" ? "👁" : "🙈";
+      });
+    });
+
+    // ── Set button loading state ──────────────────────────
+    function setLoading(btn, loading) {
+      btn.classList.toggle("loading", loading);
+      btn.disabled = loading;
+    }
+
+    // ── Island update ─────────────────────────────────────
+    function updateIsland(icon, label, state = "") {
+      island.querySelector(".island-icon").textContent = icon;
+      island.querySelector(".island-label").textContent = label;
+      island.className = state ? `island-${state}` : "";
+    }
+
+    // ── LOGIN ─────────────────────────────────────────────
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError();
+      const email    = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      if (!email || !password) { showError("Please fill in both fields."); return; }
+
+      setLoading(loginBtn, true);
+      updateIsland("⏳", "Signing in…");
+
+      const { data, error } = await CF_Auth.signIn(email, password);
+      setLoading(loginBtn, false);
+
+      if (error) {
+        showError(error);
+        updateIsland("❌", "Login failed", "alert");
+        setTimeout(() => updateIsland("🌊", "CaribFlow"), 2500);
+      } else {
+        updateIsland("✅", "Welcome back!", "success");
+        // Auth state listener handles redirect
+      }
+    });
+
+    // ── SIGNUP ────────────────────────────────────────────
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError();
+      const username = document.getElementById("signup-username").value.trim();
+      const email    = document.getElementById("signup-email").value.trim();
+      const password = document.getElementById("signup-password").value;
+
+      if (!username || !email || !password) { showError("Please fill in all fields."); return; }
+      if (username.length < 3) { showError("Username must be at least 3 characters."); return; }
+      if (!/^[a-zA-Z0-9_\.]+$/.test(username)) { showError("Username can only contain letters, numbers, dots, and underscores."); return; }
+      if (password.length < 6) { showError("Password must be at least 6 characters."); return; }
+
+      setLoading(signupBtn, true);
+      updateIsland("⏳", "Creating account…");
+
+      const { data, error } = await CF_Auth.signUp(email, password, username);
+      setLoading(signupBtn, false);
+
+      if (error) {
+        showError(error);
+        updateIsland("❌", "Signup failed", "alert");
+        setTimeout(() => updateIsland("🌊", "CaribFlow"), 2500);
+      } else {
+        updateIsland("🎉", "Account created!", "success");
+      }
+    });
+
+    // ── FORGOT PASSWORD ───────────────────────────────────
+    forgotBtn.addEventListener("click", () => {
+      forgotModal.style.display = "flex";
+    });
+    function closeForgot() { forgotModal.style.display = "none"; }
+    forgotClose.addEventListener("click", closeForgot);
+    forgotCancel.addEventListener("click", closeForgot);
+    forgotModal.addEventListener("click", e => { if (e.target === forgotModal) closeForgot(); });
+
+    resetSubmit.addEventListener("click", async () => {
+      const email = resetEmail.value.trim();
+      if (!email) {
+        resetError.textContent = "Please enter your email.";
+        resetError.classList.add("visible");
+        return;
+      }
+      resetSubmit.classList.add("loading");
+      resetSubmit.disabled = true;
+      const { error } = await CF_Auth.resetPassword(email);
+      resetSubmit.classList.remove("loading");
+      resetSubmit.disabled = false;
+      if (error) {
+        resetError.textContent = error;
+        resetError.classList.add("visible");
+      } else {
+        resetError.classList.remove("visible");
+        resetSuccess.style.display = "block";
+        setTimeout(closeForgot, 3000);
+      }
+    });
+
+    // ── SERVICE WORKER ────────────────────────────────────
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js")
+        .then(() => console.log("[CaribFlow] SW registered."))
+        .catch(err => console.warn("[CaribFlow] SW failed:", err));
+    }
+
+    // ── If already signed in, skip to dashboard ───────────
+    document.addEventListener("cf:session_ready", () => {
+      if (window.CF_SESSION.isReady) {
+        window.location.href = "./dashboard.html";
+      }
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

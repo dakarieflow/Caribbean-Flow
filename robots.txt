@@ -1,0 +1,19 @@
+# CaribFlow — robots.txt
+# Web Crawler Management
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /dashboard.html
+Allow: /profile.html
+
+# Disallow admin areas and private data paths
+Disallow: /data/
+Disallow: /js/auth.js
+Disallow: /js/supabase-client.js
+
+# Sitemap (static deployment)
+# Sitemap: https://yourdomain.netlify.app/sitemap.xml
+
+# Crawl delay (be polite to search engines)
+Crawl-delay: 5

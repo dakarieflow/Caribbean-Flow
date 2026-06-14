@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="ocean">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>CaribFlow — Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./assets/images/brand/favicon.png" />
+  <link rel="manifest" href="./manifest.json" />
+
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+
+  <style>
+    /* ── Dashboard-specific layout ───────────────────── */
+    body { background-color: var(--bg-primary); background-image: var(--gradient-ambient); background-attachment: fixed; }
+
+    .dashboard-main {
+      padding: 80px var(--space-4) 100px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* Welcome banner */
+    .welcome-banner {
+      margin-bottom: var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+    .welcome-greeting { font-size: var(--text-2xl); font-weight: var(--fw-heavy); color: var(--text-main); }
+    .welcome-greeting span { color: var(--accent-color); }
+    .welcome-sub { font-size: var(--text-sm); color: var(--text-muted); margin-top: 4px; }
+
+    /* Currency HUD */
+    .currency-hud { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: var(--space-3);
+    }
+    .feature-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-5) var(--space-3);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      text-align: center;
+      min-height: 120px;
+      position: relative;
+    }
+    .feature-tile:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-color);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+    .feature-tile:active { transform: scale(0.97); }
+    .feature-tile .tile-icon { font-size: 2rem; }
+    .feature-tile .tile-label {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-semibold);
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+    .feature-tile .tile-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .feature-tile .premium-tag {
+      position: absolute;
+      top: 8px; right: 8px;
+      font-size: 10px;
+      padding: 2px 6px;
+      background: rgba(255,215,0,0.2);
+      color: var(--coin-color);
+      border-radius: var(--radius-pill);
+      font-weight: var(--fw-bold);
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+    .stat-tile {
+      padding: var(--space-4);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      text-align: center;
+    }
+    .stat-tile .stat-val { font-size: var(--text-2xl); font-weight: var(--fw-heavy); color: var(--text-main); }
+    .stat-tile .stat-lbl { font-size: var(--text-xs); color: var(--text-muted); font-weight: var(--fw-medium); margin-top: 4px; }
+    .stat-tile .stat-icon { font-size: 1.4rem; margin-bottom: var(--space-1); }
+
+    /* Mascot + spin wheel row */
+    .gamification-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    /* Subject progress */
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-3);
+    }
+
+    /* Modal panel overlay for tools */
+    .tool-panel {
+      position: fixed;
+      inset: 0;
+      background: var(--panel-overlay);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      z-index: var(--z-overlay);
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s var(--ease-spring);
+      overflow-y: auto;
+      padding: var(--space-6) var(--space-4) 100px;
+    }
+    .tool-panel-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+      position: sticky;
+      top: 0;
+      background: var(--panel-overlay);
+      backdrop-filter: var(--glass-blur-light);
+      -webkit-backdrop-filter: var(--glass-blur-light);
+      padding: var(--space-3) 0;
+      z-index: 10;
+    }
+    .tool-panel-title { font-size: var(--text-xl); font-weight: var(--fw-bold); flex: 1; }
+    .tool-panel-back {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.2rem;
+      transition: var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .tool-panel-back:hover { background: var(--accent-subtle); color: var(--accent-color); }
+
+    /* Pomodoro layout */
+    .pomodoro-layout { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); max-width: 400px; margin: 0 auto; }
+    .pomodoro-controls { display: flex; gap: var(--space-3); }
+    .pomodoro-sessions { display: flex; gap: var(--space-2); align-items: center; }
+    .session-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--glass-border); transition: var(--transition-smooth); }
+    .session-dot.done { background: var(--accent-color); box-shadow: 0 0 8px var(--accent-glow); }
+
+    /* Calculator grid */
+    .calc-display {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      padding: var(--space-4);
+      text-align: right;
+      margin-bottom: var(--space-3);
+      min-height: 80px;
+    }
+    .calc-display .calc-expr { font-size: var(--text-sm); color: var(--text-muted); min-height: 20px; }
+    .calc-display .calc-val { font-size: var(--text-2xl); font-weight: var(--fw-bold); color: var(--text-main); font-family: var(--font-family-mono); word-break: break-all; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+    .calc-btn {
+      padding: var(--space-4);
+      border-radius: var(--radius-apple);
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      color: var(--text-main);
+      font-size: var(--text-base);
+      font-weight: var(--fw-semibold);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-family-mono);
+    }
+    .calc-btn:hover { background: var(--bg-secondary); border-color: var(--accent-color); }
+    .calc-btn:active { transform: scale(0.95); }
+    .calc-btn.op { background: var(--accent-subtle); color: var(--accent-color); }
+    .calc-btn.eq { background: var(--gradient-primary); color: white; grid-column: span 2; box-shadow: 0 4px 12px var(--accent-glow); }
+    .calc-btn.clr { background: rgba(255,59,48,0.15); color: var(--color-error); }
+    .calc-btn.fn { font-size: var(--text-xs); }
+
+    /* Citation form */
+    .citation-output {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      padding: var(--space-4);
+      font-family: var(--font-family-mono);
+      font-size: var(--text-sm);
+      color: var(--text-main);
+      min-height: 80px;
+      word-break: break-word;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    /* Todo list */
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      margin-bottom: var(--space-2);
+      transition: var(--transition-fast);
+    }
+    .todo-item.completed .todo-text { text-decoration: line-through; color: var(--text-muted); }
+    .todo-checkbox {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--glass-border);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: var(--transition-fast);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .todo-checkbox.checked { background: var(--accent-color); border-color: var(--accent-color); }
+    .todo-checkbox.checked::after { content: "✓"; color: white; font-size: 12px; font-weight: bold; }
+    .todo-text { flex: 1; font-size: var(--text-base); color: var(--text-main); cursor: text; }
+    .todo-children { padding-left: var(--space-6); margin-top: var(--space-2); }
+
+    /* Matchmaking arena */
+    .arena-scoreboard {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      margin-bottom: var(--space-4);
+    }
+    .arena-player { text-align: center; flex: 1; }
+    .arena-vs { font-size: var(--text-xl); font-weight: var(--fw-heavy); color: var(--text-muted); padding: 0 var(--space-4); }
+    .arena-score { font-size: var(--text-3xl); font-weight: var(--fw-heavy); color: var(--accent-color); }
+
+    /* Graphing canvas */
+    #graph-canvas { border-radius: var(--radius-apple); border: 1px solid var(--glass-border); display: block; width: 100%; background: #0a0a0a; }
+
+    /* SBA timeline */
+    .timeline-item {
+      display: flex;
+      gap: var(--space-4);
+      padding-bottom: var(--space-5);
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 19px; top: 40px;
+      width: 2px;
+      bottom: 0;
+      background: var(--glass-border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-dot {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      border: 2px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .timeline-dot.done { background: var(--accent-subtle); border-color: var(--accent-color); }
+    .timeline-content { flex: 1; padding-top: var(--space-2); }
+    .timeline-title { font-size: var(--text-base); font-weight: var(--fw-semibold); color: var(--text-main); }
+    .timeline-date { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
+
+    /* Formula sheet */
+    .formula-card {
+      padding: var(--space-4);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      margin-bottom: var(--space-2);
+    }
+    .formula-name { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-2); }
+    .formula-expr {
+      font-family: var(--font-family-mono);
+      font-size: var(--text-lg);
+      font-weight: var(--fw-bold);
+      color: var(--accent-color);
+      background: var(--accent-subtle);
+      padding: var(--space-3);
+      border-radius: var(--radius-apple);
+      word-break: break-all;
+    }
+
+    /* Periodic table */
+    .periodic-table-wrapper { overflow-x: auto; padding-bottom: var(--space-4); }
+    .periodic-table { display: grid; grid-template-columns: repeat(18, 52px); gap: 3px; min-width: 990px; }
+
+    /* History timeline */
+    .history-event {
+      display: flex;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-left: 3px solid var(--glass-border);
+      margin-left: var(--space-4);
+      margin-bottom: var(--space-3);
+      transition: var(--transition-fast);
+    }
+    .history-event:hover { border-left-color: var(--accent-color); background: var(--glass-bg); border-radius: 0 var(--radius-apple) var(--radius-apple) 0; }
+    .history-year { font-size: var(--text-sm); font-weight: var(--fw-bold); color: var(--accent-color); flex-shrink: 0; width: 60px; }
+    .history-desc { font-size: var(--text-sm); color: var(--text-secondary); }
+
+    /* POA ledger */
+    .ledger-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .ledger-table th {
+      background: var(--accent-subtle);
+      color: var(--accent-color);
+      padding: var(--space-3);
+      text-align: left;
+      font-weight: var(--fw-semibold);
+      border: 1px solid var(--glass-border);
+    }
+    .ledger-table td {
+      padding: var(--space-3);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+    }
+    .ledger-table tr:nth-child(even) td { background: var(--glass-bg); }
+    .ledger-table td input {
+      background: transparent;
+      border: none;
+      width: 100%;
+      color: var(--text-main);
+      font-family: var(--font-family-mono);
+    }
+    .ledger-table td input:focus { outline: 1px solid var(--accent-color); border-radius: 3px; }
+
+    /* Syntax cards */
+    .syntax-card {
+      margin-bottom: var(--space-4);
+      padding: var(--space-4);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+    }
+    .syntax-card h4 { font-size: var(--text-sm); color: var(--accent-color); margin-bottom: var(--space-3); font-weight: var(--fw-semibold); }
+    .syntax-card pre {
+      background: var(--bg-primary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-apple);
+      padding: var(--space-3);
+      font-size: var(--text-xs);
+      overflow-x: auto;
+      color: var(--color-success);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dynamic Island -->
+  <div id="dynamic-island" role="status" aria-live="polite">
+    <span class="island-icon">🌊</span>
+    <span class="island-label">Loading…</span>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container" aria-live="assertive"></div>
+
+  <!-- ══════════ MAIN DASHBOARD ══════════ -->
+  <main class="dashboard-main" id="main-dashboard">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div>
+        <h1 class="welcome-greeting">Hey, <span id="display-username">Student</span> 👋</h1>
+        <p class="welcome-sub" id="welcome-sub-text">Keep pushing — Caribbean greatness is earned.</p>
+      </div>
+      <div class="currency-hud">
+        <div class="currency-chip coins">🪙 <span id="coins-display">0</span></div>
+        <div class="currency-chip diamonds">💎 <span id="diamonds-display">0</span></div>
+        <div class="currency-chip xp">⚡ <span id="xp-display">0</span> XP</div>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-tile">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-val" id="stat-streak">0</div>
+        <div class="stat-lbl">Day Streak</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-val" id="stat-level">1</div>
+        <div class="stat-lbl">Level</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-icon">📚</div>
+        <div class="stat-val" id="stat-quizzes">0</div>
+        <div class="stat-lbl">Quizzes Done</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-val" id="stat-longest">0</div>
+        <div class="stat-lbl">Best Streak</div>
+      </div>
+    </div>
+
+    <!-- XP Progress Bar -->
+    <div class="glass-card glass-card-sm" style="margin-bottom:var(--space-6);">
+      <div class="xp-bar-container">
+        <span class="xp-bar-label">LVL <span id="xp-level-bar">1</span></span>
+        <div class="progress-track flex-1">
+          <div class="progress-fill" id="xp-progress-fill" style="width:0%"></div>
+        </div>
+        <span class="xp-bar-label"><span id="xp-bar-current">0</span> / <span id="xp-bar-next">100</span></span>
+      </div>
+    </div>
+
+    <!-- Gamification Row: Mascot + Spin Wheel -->
+    <div class="gamification-row">
+      <!-- Mascot -->
+      <div class="glass-card" style="display:flex;flex-direction:column;align-items:center;gap:var(--space-4);">
+        <div class="section-header" style="width:100%;">
+          <div>
+            <div class="section-title">Your Companion</div>
+            <div class="section-sub">Feed Cari with XP to evolve</div>
+          </div>
+        </div>
+        <div class="mascot-widget">
+          <img src="./assets/images/avatars/cari_stage1.png" alt="Cari the mascot" class="mascot-image" id="mascot-img" />
+          <div class="mascot-name" id="mascot-name-display">Cari</div>
+          <div class="mascot-stage-label" id="mascot-stage-label">🥚 Stage 1 — Baby Blob</div>
+          <div class="mascot-xp-bar">
+            <div class="progress-track thin">
+              <div class="progress-fill" id="pet-xp-fill" style="width:0%"></div>
+            </div>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--text-muted);">Pet LVL <span id="pet-level">1</span></div>
+        </div>
+      </div>
+
+      <!-- Daily Spin -->
+      <div class="glass-card" style="display:flex;flex-direction:column;align-items:center;">
+        <div class="section-header" style="width:100%;">
+          <div>
+            <div class="section-title">Daily Spin</div>
+            <div class="section-sub" id="spin-status-text">Spin once per day</div>
+          </div>
+        </div>
+        <div class="spin-wheel-container">
+          <div class="spin-wheel-wrapper">
+            <div class="spin-wheel-pointer" aria-hidden="true"></div>
+            <canvas id="spin-wheel-canvas" width="300" height="300" role="img" aria-label="Spin wheel"></canvas>
+          </div>
+          <div id="spin-result" class="spin-result-banner" style="display:none;"></div>
+          <button class="btn btn-primary" id="spin-btn">🎡 Spin!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject Progress -->
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Your Subjects</h2>
+        <p class="section-sub">Track your CSEC, CAPE & City & Guilds progress</p>
+      </div>
+    </div>
+    <div class="subjects-grid" id="subjects-grid" style="margin-bottom:var(--space-8);">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Quick Study Tools -->
+    <div class="section-header">
+      <h2 class="section-title">Study Tools</h2>
+    </div>
+    <div class="feature-grid" style="margin-bottom:var(--space-8);" id="study-tools-grid">
+
+      <div class="feature-tile" data-tool="flashcards">
+        <div class="tile-icon">🃏</div>
+        <div class="tile-label">Flashcards</div>
+        <div class="tile-sub">SRS-powered review</div>
+      </div>
+      <div class="feature-tile" data-tool="quiz">
+        <div class="tile-icon">🧠</div>
+        <div class="tile-label">Quiz Mode</div>
+        <div class="tile-sub">Test your knowledge</div>
+      </div>
+      <div class="feature-tile" data-tool="pomodoro">
+        <div class="tile-icon">⏱</div>
+        <div class="tile-label">Pomodoro Timer</div>
+        <div class="tile-sub">Focus blocks</div>
+      </div>
+      <div class="feature-tile" data-tool="todo">
+        <div class="tile-icon">✅</div>
+        <div class="tile-label">To-Do List</div>
+        <div class="tile-sub">Nested tasks</div>
+      </div>
+      <div class="feature-tile" data-tool="whiteboard">
+        <div class="tile-icon">✏️</div>
+        <div class="tile-label">Whiteboard</div>
+        <div class="tile-sub">Draw & brainstorm</div>
+      </div>
+      <div class="feature-tile" data-tool="calculator">
+        <div class="tile-icon">🔢</div>
+        <div class="tile-label">Calculator</div>
+        <div class="tile-sub">Scientific keyboard</div>
+      </div>
+      <div class="feature-tile" data-tool="graph-calc" data-premium="true">
+        <div class="tile-icon">📈</div>
+        <div class="tile-label">Graphing Calc</div>
+        <div class="tile-sub">Plot equations</div>
+        <span class="premium-tag">👑</span>
+      </div>
+      <div class="feature-tile" data-tool="citation">
+        <div class="tile-icon">📑</div>
+        <div class="tile-label">Citation Gen</div>
+        <div class="tile-sub">APA · MLA · Chicago</div>
+      </div>
+      <div class="feature-tile" data-tool="plagiarism">
+        <div class="tile-icon">🔍</div>
+        <div class="tile-label">Plagiarism Check</div>
+        <div class="tile-sub">Jaccard similarity</div>
+      </div>
+      <div class="feature-tile" data-tool="ai-tutor">
+        <div class="tile-icon">🤖</div>
+        <div class="tile-label">AI Tutor</div>
+        <div class="tile-sub">Ask anything</div>
+      </div>
+      <div class="feature-tile" data-tool="calendar" data-premium="true">
+        <div class="tile-icon">📅</div>
+        <div class="tile-label">Calendar Sync</div>
+        <div class="tile-sub">Export .ics files</div>
+        <span class="premium-tag">👑</span>
+      </div>
+      <div class="feature-tile" data-tool="scanner" data-premium="true">
+        <div class="tile-icon">📷</div>
+        <div class="tile-label">Doc Scanner</div>
+        <div class="tile-sub">Camera to PDF</div>
+        <span class="premium-tag">👑</span>
+      </div>
+      <div class="feature-tile" data-tool="pdf-annotate" data-premium="true">
+        <div class="tile-icon">📝</div>
+        <div class="tile-label">PDF Annotate</div>
+        <div class="tile-sub">Highlight past papers</div>
+        <span class="premium-tag">👑</span>
+      </div>
+      <div class="feature-tile" data-tool="loot-box">
+        <div class="tile-icon">📦</div>
+        <div class="tile-label">Loot Box</div>
+        <div class="tile-sub">Open for rewards</div>
+      </div>
+    </div>
+
+    <!-- Caribbean Reference Tools -->
+    <div class="section-header">
+      <h2 class="section-title">Caribbean Reference</h2>
+    </div>
+    <div class="feature-grid" style="margin-bottom:var(--space-8);">
+      <div class="feature-tile" data-tool="sba">
+        <div class="tile-icon">📋</div>
+        <div class="tile-label">SBA Tracker</div>
+        <div class="tile-sub">CSEC & CAPE milestones</div>
+      </div>
+      <div class="feature-tile" data-tool="syllabus">
+        <div class="tile-icon">📖</div>
+        <div class="tile-label">Syllabus Tracker</div>
+        <div class="tile-sub">POA · IT · Physics…</div>
+      </div>
+      <div class="feature-tile" data-tool="formulas">
+        <div class="tile-icon">➗</div>
+        <div class="tile-label">Formula Sheet</div>
+        <div class="tile-sub">Maths & Physics</div>
+      </div>
+      <div class="feature-tile" data-tool="periodic">
+        <div class="tile-icon">⚗️</div>
+        <div class="tile-label">Periodic Table</div>
+        <div class="tile-sub">Interactive elements</div>
+      </div>
+      <div class="feature-tile" data-tool="poa-ledger">
+        <div class="tile-icon">🧾</div>
+        <div class="tile-label">POA Ledger</div>
+        <div class="tile-sub">T-accounts & trials</div>
+      </div>
+      <div class="feature-tile" data-tool="syntax">
+        <div class="tile-icon">💻</div>
+        <div class="tile-label">IT Syntax Guide</div>
+        <div class="tile-sub">Pascal & C reference</div>
+      </div>
+      <div class="feature-tile" data-tool="history">
+        <div class="tile-icon">🗺</div>
+        <div class="tile-label">History Timeline</div>
+        <div class="tile-sub">Caribbean events</div>
+      </div>
+    </div>
+
+    <!-- Social -->
+    <div class="section-header">
+      <h2 class="section-title">Social</h2>
+    </div>
+    <div class="feature-grid" style="margin-bottom:var(--space-8);">
+      <div class="feature-tile" data-tool="leaderboard">
+        <div class="tile-icon">🏆</div>
+        <div class="tile-label">Leaderboards</div>
+        <div class="tile-sub">Country · Parish · School</div>
+      </div>
+      <div class="feature-tile" data-tool="matchmaking">
+        <div class="tile-icon">⚔️</div>
+        <div class="tile-label">Quiz Battle</div>
+        <div class="tile-sub">Live multiplayer</div>
+      </div>
+      <div class="feature-tile" data-tool="qa-board">
+        <div class="tile-icon">💬</div>
+        <div class="tile-label">Q&A Board</div>
+        <div class="tile-sub">Anonymous questions</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════ BOTTOM NAV ══════════ -->
+  <nav class="nav-bar" role="navigation" aria-label="Main navigation">
+    <a href="./dashboard.html" class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <button class="nav-item" data-tool="quiz">
+      <span class="nav-icon">🧠</span>
+      <span class="nav-label">Study</span>
+    </button>
+    <button class="nav-item" data-tool="leaderboard">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Ranks</span>
+    </button>
+    <a href="./profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profile</span>
+    </a>
+  </nav>
+
+  <!-- ══════════ TOOL PANELS (injected by JS) ══════════ -->
+  <div id="tool-panel-container"></div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="./js/supabase-client.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/gamification.js"></script>
+  <script src="./js/ai-engine.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
